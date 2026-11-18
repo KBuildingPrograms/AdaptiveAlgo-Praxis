@@ -5,16 +5,22 @@ MU222 = parquetread("V408A 222 4 units pleth only 6.11.24.parquet");
 
 UK230 = parquetread("4 unit no implant pleth V408A 230 6.13.24.parquet");
 %larger files load fine :)
+
 %%
 %Stage one, filtering
+
 function filtered_data = preprocessing(unfiltered_data)
-    shift = -((unfiltered_data) - mean(unfiltered_data,2));
+    shift = -((unfiltered_data) - mean(unfiltered_data,2))/std(unfiltered_data); %Normalization
     h = [1/2,1/2];
     binomial_coeff_filter = conv(conv(h,h),h);
-    binomialMA = filter(binomial_coeff_filter,1,shift);
-    [b,a] = butter(2,6);
+    binomialMA = filter(binomial_coeff_filter,1,shift); %Reduction of variation (based on standard for data in lab)
+    [b,a] = butter(2,6); %weak low pass filter with cutoff around the maximum for breathrate in mice
     filtered_data = filter(b,a,binomialMA(:,2));
 end
+
 %Stage two - unknown reducing
+N = 3*60*60*2000; %length of overall segment
+
+
 
 %Final stage sigmoid
